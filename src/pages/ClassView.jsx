@@ -7,12 +7,13 @@ import NoteModal from '../components/students/NoteModal';
 
 const ClassView = ({
     selectedGroup,
-    students,
     onBack,
     onOpenProfile
 }) => {
     const {
+        students,
         studentsState,
+        isLoading,
         toggleAttendance,
         toggleTask,
         toggleTag,
@@ -31,6 +32,15 @@ const ClassView = ({
     const filteredStudents = students.filter(s =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    if (isLoading) {
+        return (
+            <div className="bg-[#f4f6f8] min-h-screen flex flex-col items-center justify-center p-10">
+                <div className="w-12 h-12 border-4 border-[#691C32] border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-[#691C32] font-black uppercase tracking-widest text-xs animate-pulse">Cargando lista de alumnos...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-[#f4f6f8] min-h-screen pb-24 flex flex-col relative overflow-hidden">

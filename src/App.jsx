@@ -28,7 +28,6 @@ export default function App() {
         ) : currentScreen === 'class' ? (
           <ClassView
             selectedGroup={selectedGroup}
-            students={STUDENTS_1D}
             onBack={() => setCurrentScreen('dashboard')}
             onOpenProfile={handleOpenProfile}
           />

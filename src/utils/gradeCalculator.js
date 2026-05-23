@@ -1,35 +1,67 @@
-import { BEHAVIOR_TAGS } from './constants';
-
 /**
- * Calcula la calificación de asistencia basada en una regla de 3 (Escala 0-10).
+ * src/utils/gradeCalculator.js
+ * Motor de reglas de evaluación para la Esc. Sec. Gral. Miguel Hidalgo y Costilla
  */
-export const calculateAttendanceGrade = (presents, totalClasses) => {
-    if (!totalClasses || totalClasses === 0) return 10;
-    return Number(((presents / totalClasses) * 10).toFixed(1));
+
+// 1. LÓGICA DEL SEMÁFORO
+export const getStudentStatus = (projectedGrade) => {
+    // De 8.0 hacia arriba -> Óptimo (Verde)
+    if (projectedGrade >= 8.0) {
+        return 'good';
+    }
+    // De 7.0 a 7.9 -> Requiere Atención (Ámbar)
+    else if (projectedGrade >= 7.0) {
+        return 'warning';
+    }
+    // Menor a 7.0 (6.9 hacia abajo) -> Riesgo (Rojo)
+    else {
+        return 'danger';
+    }
 };
 
-/**
- * Calcula la calificación de prácticas entregadas (Escala 0-10).
- */
-export const calculateTasksGrade = (delivered, totalTasks) => {
-    if (!totalTasks || totalTasks === 0) return 0;
-    return Number(((delivered / totalTasks) * 10).toFixed(1));
+// 2. CÁLCULO DE ASISTENCIA (Escala de 10)
+export const calculateAttendanceScore = (attendedClasses, totalClasses) => {
+    if (totalClasses === 0) return 10.0;
+    const score = (attendedClasses / totalClasses) * 10;
+    return Number(score.toFixed(1)); // Redondea a 1 decimal (ej. 8.5)
 };
 
-/**
- * Calcula la Guía de Observación (Conducta).
- * Base 10, suma o resta según el impacto de los tags activos.
- */
-export const calculateConductGrade = (activeTagIds = []) => {
-    let score = 10;
+// 3. CÁLCULO DE PRÁCTICAS (Escala de 10)
+export const calculateTasksScore = (deliveredTasks, totalTasks) => {
+    if (totalTasks === 0) return 10.0;
+    const score = (deliveredTasks / totalTasks) * 10;
+    return Number(score.toFixed(1));
+};
 
-    activeTagIds.forEach(id => {
-        const tag = BEHAVIOR_TAGS.find(t => t.id === id);
-        if (tag && tag.impact) {
-            score += tag.impact;
+// 4. CÁLCULO DE GUÍA DE OBSERVACIÓN (Base 10 + Penalizaciones)
+export const calculateObservationScore = (behaviorTags = []) => {
+    let baseScore = 10.0;
+
+    // Valores definidos en tus requerimientos
+    const tagImpacts = {
+        'play': -0.5, // 🎮 Jugó
+        'talk': -0.5, // 🗣️ Platicó
+        'out': -1.0,  // 🏃 Se salió sin permiso
+        'lazy': -1.0, // ❌ No trabajó
+        'star': +0.5  // ⭐ Trabajo destacado
+    };
+
+    behaviorTags.forEach(tagId => {
+        if (tagImpacts[tagId]) {
+            baseScore += tagImpacts[tagId];
         }
     });
 
-    // Limitar entre 0 y 10
-    return Number(Math.min(10, Math.max(0, score)).toFixed(1));
+    // Aseguramos que la calificación no pase de 10 ni baje de 6 (mínimo aprobatorio)
+    if (baseScore > 10.0) return 10.0;
+    if (baseScore < 6.0) return 6.0;
+
+    return Number(baseScore.toFixed(1));
+};
+
+// 5. CÁLCULO FINAL (Proyección Trimestral)
+export const calculateFinalProjectedGrade = (attendance, tasks, observation) => {
+    // Promedio simple de los 3 rubros diarios.
+    const final = (attendance + tasks + observation) / 3;
+    return Number(final.toFixed(1));
 };

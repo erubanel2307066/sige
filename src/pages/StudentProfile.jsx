@@ -8,13 +8,13 @@ const StudentProfile = ({ student, onBack }) => {
         attendance: 85,
         tasks: 70,
         conduct: 8.5,
-        status: 'atencion' // optimo, atencion, riesgo
+        status: 'warning' // good, warning, danger
     };
 
     const statusConfig = {
-        optimo: { label: 'Rendimiento Óptimo', color: 'bg-emerald-500', icon: <CheckCircle className="text-white" size={20} />, text: 'text-emerald-700' },
-        atencion: { label: 'Requiere Atención', color: 'bg-amber-500', icon: <HelpCircle className="text-white" size={20} />, text: 'text-amber-700' },
-        riesgo: { label: 'En Riesgo Académico', color: 'bg-rose-500', icon: <AlertCircle className="text-white" size={20} />, text: 'text-rose-700' }
+        good: { label: 'Rendimiento Óptimo', color: 'bg-emerald-500', icon: <CheckCircle className="text-white" size={20} />, text: 'text-emerald-700' },
+        warning: { label: 'Requiere Atención', color: 'bg-amber-500', icon: <HelpCircle className="text-white" size={20} />, text: 'text-amber-700' },
+        danger: { label: 'En Riesgo Académico', color: 'bg-rose-500', icon: <AlertCircle className="text-white" size={20} />, text: 'text-rose-700' }
     };
 
     const currentStatus = statusConfig[stats.status];
