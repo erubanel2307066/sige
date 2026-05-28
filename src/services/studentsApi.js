@@ -38,3 +38,34 @@ export const getStudentsByGroup = async (groupId) => {
         return [];
     }
 };
+
+/**
+ * Obtiene todo el historial (bitácora diaria + registros de conducta) de un alumno
+ * @param {string} alumnoId
+ * @returns {Promise<{bitacora: Array, conducta: Array}>}
+ */
+export const getStudentHistory = async (alumnoId) => {
+    try {
+        if (!alumnoId) return { bitacora: [], conducta: [] };
+
+        const { data: bitacora, error: bError } = await supabase
+            .from('bitacora_diaria')
+            .select('*')
+            .eq('alumno_id', alumnoId)
+            .order('fecha', { ascending: true });
+
+        const { data: conducta, error: cError } = await supabase
+            .from('registros_conducta')
+            .select('*')
+            .eq('alumno_id', alumnoId)
+            .order('fecha', { ascending: true });
+
+        if (bError) throw bError;
+        if (cError) throw cError;
+
+        return { bitacora: bitacora || [], conducta: conducta || [] };
+    } catch (error) {
+        console.error('[getStudentHistory] Error:', error.message || error);
+        return { bitacora: [], conducta: [] };
+    }
+};

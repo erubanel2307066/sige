@@ -1,15 +1,96 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, Download, AlertCircle, CheckCircle, HelpCircle, Activity, FileText, ClipboardList } from 'lucide-react';
 import Header from '../components/layout/Header';
+import { getStudentHistory } from '../services/studentsApi';
+import { calculateAttendanceScore, calculateTasksScore, calculateObservationScore, calculateFinalProjectedGrade, getStudentStatus } from '../utils/gradeCalculator';
+const StudentProfile = ({ student: studentProp, onBack }) => {
+    const student = studentProp || null;
+    const alumnoId = student?.id || null;
 
-const StudentProfile = ({ student, onBack }) => {
-    // Mock Data para el perfil
-    const stats = {
-        attendance: 85,
-        tasks: 70,
-        conduct: 8.5,
-        status: 'warning' // good, warning, danger
-    };
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({ attendance: 0, tasks: 0, conduct: 10.0, status: 'good', final: 10.0 });
+    const [timeline, setTimeline] = useState([]);
+
+    useEffect(() => {
+        const load = async () => {
+            if (!alumnoId) {
+                setLoading(false);
+                return;
+            }
+            setLoading(true);
+            try {
+                const { bitacora, conducta } = await getStudentHistory(alumnoId);
+
+                // Attendance: contar asistencias
+                const totalClasses = bitacora.length;
+                const attendedClasses = bitacora.filter(b => b.asistencia === true || b.asistencia === 'presente' || b.asistencia === 'Presente' || b.asistencia === 'P' || b.asistencia === 1 || b.asistencia === '1').length;
+                const attendanceScore = calculateAttendanceScore(attendedClasses, totalClasses); // 0-10
+
+                // Tasks
+                const deliveredTasks = bitacora.filter(b => b.entrega_practica === true || b.entrega_practica === '1' || b.entrega_practica === 1).length;
+                const tasksScore = calculateTasksScore(deliveredTasks, totalClasses);
+
+                // Observation / Conducta
+                const behaviorTags = conducta.map(c => c.tag_id);
+                const observationScore = calculateObservationScore(behaviorTags);
+
+                // Final projection
+                const finalProjected = calculateFinalProjectedGrade(attendanceScore, tasksScore, observationScore);
+                const status = getStudentStatus(finalProjected);
+
+                // Convert to percentages for progress bars (0-100)
+                const attendancePercent = Math.min(100, Math.round(attendanceScore * 10));
+                const tasksPercent = Math.min(100, Math.round(tasksScore * 10));
+
+                setStats({ attendance: attendancePercent, tasks: tasksPercent, conduct: observationScore, status, final: finalProjected });
+
+                // Build timeline from both sources (most recent first)
+                const timelineItems = [];
+                bitacora.forEach(b => {
+                    const date = b.fecha ? new Date(b.fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) : '';
+                    if (b.notas) {
+                        timelineItems.push({ date, type: 'Nota', content: b.notas, icon: '📝', rawDate: b.fecha });
+                    }
+                    if (b.asistencia === false || b.asistencia === 'ausente' || b.asistencia === 'Ausente') {
+                        timelineItems.push({ date, type: 'Asistencia', content: 'Ausencia registrada', icon: '⛔', rawDate: b.fecha });
+                    } else if (b.asistencia === true || b.asistencia === 'presente' || b.asistencia === 'P') {
+                        // only push late or special notes if present
+                        if (b.notas && b.notas.toLowerCase().includes('tarde')) {
+                            timelineItems.push({ date, type: 'Asistencia', content: b.notas, icon: '⏰', rawDate: b.fecha });
+                        }
+                    }
+                    if (b.entrega_practica) {
+                        timelineItems.push({ date, type: 'Práctica', content: 'Práctica entregada', icon: '⭐', rawDate: b.fecha });
+                    }
+                });
+
+                conducta.forEach(c => {
+                    const date = c.fecha ? new Date(c.fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) : '';
+                    const tag = c.tag_id;
+                    let label = tag;
+                    let icon = '🗣️';
+                    if (tag === 'play') { label = 'Jugó en clase'; icon = '🎮'; }
+                    else if (tag === 'talk') { label = 'Platicó en clase'; icon = '🗣️'; }
+                    else if (tag === 'out') { label = 'Se salió sin permiso'; icon = '🏃'; }
+                    else if (tag === 'lazy') { label = 'No trabajó'; icon = '💤'; }
+                    else if (tag === 'star') { label = 'Trabajo destacado'; icon = '⭐'; }
+
+                    timelineItems.push({ date, type: 'Conducta', content: label, icon, rawDate: c.fecha });
+                });
+
+                // sort by rawDate desc
+                timelineItems.sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+                setTimeline(timelineItems);
+
+            } catch (err) {
+                console.error('Error loading student history:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        load();
+    }, [alumnoId]);
 
     const statusConfig = {
         good: { label: 'Rendimiento Óptimo', color: 'bg-emerald-500', icon: <CheckCircle className="text-white" size={20} />, text: 'text-emerald-700' },
@@ -17,19 +98,13 @@ const StudentProfile = ({ student, onBack }) => {
         danger: { label: 'En Riesgo Académico', color: 'bg-rose-500', icon: <AlertCircle className="text-white" size={20} />, text: 'text-rose-700' }
     };
 
-    const currentStatus = statusConfig[stats.status];
-
-    const timeline = [
-        { date: '22 May', type: 'Conducta', content: 'Platicó en clase durante la explicación de variables.', icon: '🗣️' },
-        { date: '15 May', type: 'Nota', content: 'Entregó la práctica de algoritmos muy completa.', icon: '⭐' },
-        { date: '08 May', type: 'Asistencia', content: 'Llegó tarde a la primera hora (Retardo).', icon: '⏰' },
-    ];
+    const currentStatus = statusConfig[stats.status || 'good'];
 
     return (
         <div className="bg-[#f4f6f8] min-h-screen pb-10 text-left">
             <Header
-                title={`LISTA #${student.listNum}`}
-                subtitle={student.name}
+                title={student ? `LISTA #${student.listNum}` : 'EXPEDIENTE'}
+                subtitle={student ? student.name : ''}
                 showBack={true}
                 onBack={onBack}
             />
@@ -42,6 +117,12 @@ const StudentProfile = ({ student, onBack }) => {
             </div>
 
             <div className="p-5 space-y-6">
+
+                {loading && (
+                    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
+                        <p className="text-[#691C32] font-black uppercase tracking-widest">Cargando expediente...</p>
+                    </div>
+                )}
 
                 {/* 1. Semáforo de Estado */}
                 <div className={`p-5 rounded-3xl ${currentStatus.color} shadow-lg shadow-black/10 flex items-center justify-between`}>

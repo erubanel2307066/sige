@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/layout/Header';
+import { exportGroupToExcel, exportGroupToPDF } from '../services/reportsApi';
 import SearchBar from '../components/shared/SearchBar';
 import StudentCard from '../components/students/StudentCard';
 import useStudentsData from '../hooks/useStudentsData';
@@ -23,10 +24,37 @@ const ClassView = ({
     const [searchQuery, setSearchQuery] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [activeNoteModal, setActiveNoteModal] = useState(null);
+    const [isExporting, setIsExporting] = useState(false);
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
     const triggerSave = () => {
         setIsSaving(true);
         setTimeout(() => setIsSaving(false), 500);
+    };
+
+    const handleExport = async () => {
+        if (!selectedGroup || students.length === 0) return;
+        try {
+            setIsExporting(true);
+            // exportGroupToExcel will fetch histories if needed
+            await exportGroupToExcel(selectedGroup.id, students);
+        } catch (err) {
+            console.error('Export error:', err);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleGeneratePDF = async () => {
+        if (!selectedGroup || students.length === 0) return;
+        try {
+            setIsGeneratingPDF(true);
+            await exportGroupToPDF(selectedGroup.id, students);
+        } catch (err) {
+            console.error('PDF generation error:', err);
+        } finally {
+            setIsGeneratingPDF(false);
+        }
     };
 
     const filteredStudents = students.filter(s =>
@@ -53,12 +81,34 @@ const ClassView = ({
             />
 
             {/* Barra de Búsqueda Integrada */}
-            <div className="bg-[#691C32] px-4 pb-4 shadow-xl -mt-1">
-                <SearchBar
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder="Buscar apellido del alumno..."
-                />
+            <div className="bg-[#691C32] px-4 pb-4 shadow-xl -mt-1 flex items-center gap-4">
+                <div className="flex-1">
+                    <SearchBar
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                        placeholder="Buscar apellido del alumno..."
+                    />
+                </div>
+
+                <div className="pr-2">
+                    <div className="flex items-center gap-2">
+                        <button
+                            disabled={!selectedGroup || students.length === 0 || isExporting}
+                            onClick={handleExport}
+                            className="flex items-center gap-2 bg-[#BC955C] text-[#691C32] px-4 py-2 rounded-lg font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                        >
+                            {isExporting ? 'Generando...' : 'Descargar Excel'}
+                        </button>
+
+                        <button
+                            disabled={!selectedGroup || students.length === 0 || isGeneratingPDF}
+                            onClick={handleGeneratePDF}
+                            className="flex items-center gap-2 border border-[#BC955C] text-[#691C32] px-4 py-2 rounded-lg font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                        >
+                            {isGeneratingPDF ? 'Generando...' : 'Generar Acta PDF'}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="p-4 space-y-2">
