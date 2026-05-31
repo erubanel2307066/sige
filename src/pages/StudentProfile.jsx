@@ -3,7 +3,7 @@ import { ChevronLeft, Download, AlertCircle, CheckCircle, HelpCircle, Activity, 
 import Header from '../components/layout/Header';
 import { getStudentHistory } from '../services/studentsApi';
 import { calculateAttendanceScore, calculateTasksScore, calculateObservationScore, calculateFinalProjectedGrade, getStudentStatus } from '../utils/gradeCalculator';
-const StudentProfile = ({ student: studentProp, onBack }) => {
+const StudentProfile = ({ student: studentProp, onBack, onSignOut }) => {
     const student = studentProp || null;
     const alumnoId = student?.id || null;
 
@@ -107,6 +107,7 @@ const StudentProfile = ({ student: studentProp, onBack }) => {
                 subtitle={student ? student.name : ''}
                 showBack={true}
                 onBack={onBack}
+                onSignOut={onSignOut}
             />
 
             {/* Botón de Descarga Flotante/Header */}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronLeft, QrCode } from 'lucide-react';
 
-const Header = ({ title, subtitle, showBack, onBack, rightIcon }) => {
+const Header = ({ title, subtitle, showBack, onBack, rightIcon, onSignOut }) => {
     return (
         <div className="sticky top-0 z-50 shadow-lg">
             {/* Barra de Título Institucional */}
@@ -27,11 +27,21 @@ const Header = ({ title, subtitle, showBack, onBack, rightIcon }) => {
                         </div>
                     </div>
 
-                    {rightIcon && (
-                        <button className="bg-[#BC955C] text-[#691C32] p-2 rounded-xl shadow-md active:bg-[#a6824f] transition-all transform active:scale-95">
-                            <QrCode size={22} strokeWidth={2.5} />
-                        </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {onSignOut && (
+                            <button
+                                onClick={onSignOut}
+                                className="bg-white text-[#691C32] px-3 py-2 rounded-xl font-bold text-xs uppercase tracking-[2px] shadow-md active:bg-gray-100 transition-all"
+                            >
+                                Cerrar Sesión
+                            </button>
+                        )}
+                        {rightIcon && (
+                            <button className="bg-[#BC955C] text-[#691C32] p-2 rounded-xl shadow-md active:bg-[#a6824f] transition-all transform active:scale-95">
+                                <QrCode size={22} strokeWidth={2.5} />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 

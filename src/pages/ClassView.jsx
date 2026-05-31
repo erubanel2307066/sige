@@ -9,7 +9,8 @@ import NoteModal from '../components/students/NoteModal';
 const ClassView = ({
     selectedGroup,
     onBack,
-    onOpenProfile
+    onOpenProfile,
+    onSignOut
 }) => {
     const {
         students,
@@ -78,11 +79,12 @@ const ClassView = ({
                 showBack={true}
                 onBack={onBack}
                 rightIcon={true}
+                onSignOut={onSignOut}
             />
 
             {/* Barra de Búsqueda Integrada */}
-            <div className="bg-[#691C32] px-4 pb-4 shadow-xl -mt-1 flex items-center gap-4">
-                <div className="flex-1">
+            <div className="bg-[#691C32] px-4 pb-4 shadow-xl -mt-1 flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex-1 min-w-0">
                     <SearchBar
                         value={searchQuery}
                         onChange={setSearchQuery}
@@ -90,12 +92,12 @@ const ClassView = ({
                     />
                 </div>
 
-                <div className="pr-2">
-                    <div className="flex items-center gap-2">
+                <div className="pr-0 sm:pr-2 w-full sm:w-auto">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                         <button
                             disabled={!selectedGroup || students.length === 0 || isExporting}
                             onClick={handleExport}
-                            className="flex items-center gap-2 bg-[#BC955C] text-[#691C32] px-4 py-2 rounded-lg font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#BC955C] text-[#691C32] px-4 py-3 rounded-lg font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
                         >
                             {isExporting ? 'Generando...' : 'Descargar Excel'}
                         </button>
@@ -103,7 +105,7 @@ const ClassView = ({
                         <button
                             disabled={!selectedGroup || students.length === 0 || isGeneratingPDF}
                             onClick={handleGeneratePDF}
-                            className="flex items-center gap-2 border border-[#BC955C] text-[#691C32] px-4 py-2 rounded-lg font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 border border-[#BC955C] text-[#691C32] px-4 py-3 rounded-lg font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
                         >
                             {isGeneratingPDF ? 'Generando...' : 'Generar Acta PDF'}
                         </button>

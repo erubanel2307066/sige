@@ -1,15 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+    font-family: 'Inter', sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-bg-light text-slate-800 antialiased;
-    font-family: 'Montserrat', sans-serif;
+    @apply bg-brand-background text-brand-text antialiased;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-image: radial-gradient(circle at top left, rgba(245, 183, 0, 0.12), transparent 24%),
+      radial-gradient(circle at bottom right, rgba(110, 23, 54, 0.08), transparent 20%);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 }
 
 @layer utilities {
+  .glass-card {
+    @apply bg-white/90 backdrop-blur-xl border border-white/70 shadow-soft;
+  }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }

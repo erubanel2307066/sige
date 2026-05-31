@@ -69,3 +69,123 @@ export const getStudentHistory = async (alumnoId) => {
         return { bitacora: [], conducta: [] };
     }
 };
+
+export const getActiveTrimester = async () => {
+    try {
+        const { data, error } = await supabase
+            .from('configuracion_escolar')
+            .select('trimestre_actual')
+            .eq('id', 1)
+            .single();
+
+        if (error) {
+            console.error('[getActiveTrimester] Error:', error);
+            throw error;
+        }
+
+        return data?.trimestre_actual ?? 1;
+    } catch (error) {
+        console.error('[getActiveTrimester] Error:', error.message || error);
+        return 1;
+    }
+};
+
+export const updateActiveTrimester = async (num) => {
+    try {
+        const { data, error } = await supabase
+            .from('configuracion_escolar')
+            .update({ trimestre_actual: num })
+            .eq('id', 1);
+
+        if (error) {
+            console.error('[updateActiveTrimester] Error:', error);
+            throw error;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('[updateActiveTrimester] Error:', error.message || error);
+        return null;
+    }
+};
+
+export const promoteStudents = async () => {
+    try {
+        const stepOne = await supabase
+            .from('alumnos')
+            .update({ estatus: false, grupo_id: 'Graduados' })
+            .eq('grupo_id', '3D');
+
+        if (stepOne.error) {
+            throw stepOne.error;
+        }
+
+        const stepTwo = await supabase
+            .from('alumnos')
+            .update({ grupo_id: '3D' })
+            .eq('grupo_id', '2D');
+
+        if (stepTwo.error) {
+            throw stepTwo.error;
+        }
+
+        const stepThree = await supabase
+            .from('alumnos')
+            .update({ grupo_id: '2D' })
+            .eq('grupo_id', '1D');
+
+        if (stepThree.error) {
+            throw stepThree.error;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('[promoteStudents] Error:', error.message || error);
+        return false;
+    }
+};
+
+export const bulkInsertStudents = async (namesArray) => {
+    try {
+        const sanitized = namesArray
+            .map(name => name?.trim())
+            .filter(Boolean);
+
+        if (sanitized.length === 0) {
+            return [];
+        }
+
+        const { data: lastRow, error: fetchError } = await supabase
+            .from('alumnos')
+            .select('numero_lista')
+            .eq('grupo_id', '1D')
+            .order('numero_lista', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (fetchError) {
+            throw fetchError;
+        }
+
+        const startListNumber = (lastRow?.numero_lista ?? 0) + 1;
+        const inserts = sanitized.map((nombre_completo, index) => ({
+            nombre_completo,
+            numero_lista: startListNumber + index,
+            grupo_id: '1D',
+            estatus: true
+        }));
+
+        const { data, error: insertError } = await supabase
+            .from('alumnos')
+            .insert(inserts);
+
+        if (insertError) {
+            throw insertError;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('[bulkInsertStudents] Error:', error.message || error);
+        return [];
+    }
+};
