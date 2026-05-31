@@ -1,18 +1,18 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 
-const SearchBar = ({ value, onChange, placeholder = "Buscar..." }) => {
+const SearchBar = ({ value, onChange, placeholder = '🔍 Buscar alumno...' }) => {
     return (
         <div className="relative w-full">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-slate-400" />
             </div>
             <input
                 type="text"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="block w-full pl-11 pr-4 py-3.5 bg-white text-gray-900 font-medium text-[15px] border-2 border-transparent rounded-2xl shadow-inner focus:outline-none focus:border-[#BC955C] focus:ring-4 focus:ring-[#BC955C]/10 transition-all placeholder:text-gray-400 placeholder:font-normal"
                 placeholder={placeholder}
+                className="block w-full h-[52px] pl-12 pr-4 rounded-[16px] border border-slate-200 bg-white text-slate-900 text-sm font-medium shadow-sm focus:outline-none focus:border-[#7A1235] focus:ring-2 focus:ring-[#7A1235]/10 transition-all placeholder:text-slate-400"
             />
         </div>
     );

@@ -3,20 +3,20 @@ import { BEHAVIOR_TAGS } from '../../utils/constants';
 
 const BehaviorTags = ({ activeTags = [], onToggle }) => {
     return (
-        <div className="flex overflow-x-auto gap-2.5 pr-4 py-1 no-scrollbar select-none">
+        <div className="flex flex-wrap gap-2">
             {BEHAVIOR_TAGS.map(tag => {
                 const isActive = activeTags.includes(tag.id);
                 return (
                     <button
                         key={tag.id}
                         onClick={() => onToggle(tag.id)}
-                        className={`flex-shrink-0 h-11 px-4 rounded-full border-2 text-[15px] flex items-center justify-center transition-all transform active:scale-95 ${isActive
-                                ? 'bg-[#691C32] text-white border-[#691C32] shadow-md'
-                                : 'bg-gray-50 border-gray-200 text-gray-600 hover:border-gray-300'
+                        className={`min-w-0 flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${isActive
+                                ? 'bg-[#EEF2FF] border-[#2563EB] text-[#1E3A8A]'
+                                : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                             }`}
                     >
-                        <span className="mr-1.5">{tag.icon}</span>
-                        <span className="font-bold text-[11px] uppercase tracking-wider">{tag.label}</span>
+                        <span>{tag.icon}</span>
+                        <span className="truncate">{tag.label}</span>
                     </button>
                 );
             })}

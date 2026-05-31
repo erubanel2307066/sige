@@ -76,7 +76,7 @@ export const getActiveTrimester = async () => {
             .from('configuracion_escolar')
             .select('trimestre_actual')
             .eq('id', 1)
-            .single();
+            .maybeSingle();
 
         if (error) {
             console.error('[getActiveTrimester] Error:', error);

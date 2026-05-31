@@ -1,86 +1,160 @@
 import React from 'react';
-import Header from '../components/layout/Header';
-import { BookOpen, Clock, GraduationCap, Settings } from 'lucide-react';
+import { BookOpen, Clock, GraduationCap, Settings, Users2 } from 'lucide-react';
 import { GROUPS_DB, SCHEDULE } from '../utils/constants';
-import { getCurrentDayInfo } from '../utils/dateFormats';
 
 const Dashboard = ({ onSelectGroup, onSignOut, onOpenAdmin }) => {
-    const { dayIndex, dayName } = getCurrentDayInfo();
-    const todaysClasses = SCHEDULE[dayIndex] || [];
+    const date = new Date();
+    const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const dateLabel = `${dayNames[date.getDay()]}, ${date.getDate()} de ${monthNames[date.getMonth()]} de ${date.getFullYear()}`;
+    const displayDay = [0, 6].includes(date.getDay()) ? 1 : date.getDay();
+    const todaysClasses = SCHEDULE[displayDay] || [];
+    const totalStudents = todaysClasses.reduce((sum, cls) => {
+        const groupInfo = GROUPS_DB[cls.groupId];
+        return sum + (groupInfo?.count || 0);
+    }, 0);
 
     return (
-        <div className="bg-[#f4f6f8] min-h-screen pb-10 text-left">
-            <Header onSignOut={onSignOut} />
-
-            {/* Banner de Bienvenida */}
-            <div className="bg-gradient-to-br from-[#0D47A1] via-[#1976D2] to-[#26C6DA] px-6 pb-12 pt-6 rounded-b-[40px] shadow-inner relative overflow-hidden -mt-1">
-                <div className="absolute right-0 top-0 opacity-20 transform translate-x-1/4 -translate-y-1/4">
-                    <GraduationCap size={140} color="white" />
-                </div>
-                <div className="absolute left-[-30px] top-10 h-24 w-24 rounded-full bg-[#43A047]/15 blur-2xl" />
-                <div className="relative z-10 flex flex-col gap-4">
-                    <div className="absolute right-4 top-4">
-                        <button
-                            type="button"
-                            onClick={onOpenAdmin}
-                            className="inline-flex items-center justify-center rounded-2xl bg-white/15 px-3 py-3 text-white transition hover:bg-white/20"
-                            aria-label="Ir a Configuración del Ciclo"
-                        >
-                            <Settings size={20} />
-                        </button>
+        <div className="bg-brand-background min-h-screen pb-28 text-slate-950">
+            <div className="px-4 pt-6 pb-4">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                        <p className="text-base font-semibold text-slate-950">¡Buenos días, Profe! 👋</p>
+                        <p className="mt-2 text-sm text-slate-500">{dateLabel}</p>
+                        <p className="mt-1 text-sm text-slate-500">Esc. Sec. Miguel Hidalgo y Costilla</p>
                     </div>
-                    <div className="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-3 text-white shadow-lg shadow-slate-900/10 backdrop-blur-sm border border-white/20 w-fit">
-                        <img src="/sige_vertical.png" alt="SIGE Logo" className="h-20 w-auto" />
-                        <div className="text-left">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-white/80">SIGE</p>
-                            <p className="text-sm font-bold text-white">Gestión Escolar</p>
+                    <button
+                        onClick={onSignOut}
+                        className="rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    >
+                        Cerrar sesión
+                    </button>
+                </div>
+
+                <div className="relative mt-5 overflow-hidden rounded-[28px] bg-gradient-to-br from-[#7A1235] to-[#A42D56] px-7 py-8 text-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+                    <div className="pointer-events-none absolute -right-24 -top-24 h-[280px] w-[280px] rounded-full bg-white/8" />
+                    <div className="relative z-10">
+                        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="min-w-0">
+                            <p className="text-xs uppercase tracking-[0.35em] text-white/80">SIGE</p>
+                            <h1 className="mt-2 text-2xl font-bold leading-tight">Gestión Escolar</h1>
+                            <p className="mt-4 max-w-md text-sm leading-6 text-white/90">Herramientas simples para una enseñanza organizada y eficiente.</p>
+                        </div>
+                        <div className="flex items-center justify-end">
+                            <img
+                                src="/sige_vertical.png"
+                                alt="Logo SIGE"
+                                className="h-44 w-auto rounded-[24px] border border-white/25 bg-white p-3 shadow-[0_20px_50px_rgba(0,0,0,0.18)]"
+                            />
                         </div>
                     </div>
-                    <p className="text-[#ECEFF1] text-xs font-bold uppercase tracking-[0.35em]">Panel del Docente</p>
-                    <h2 className="text-2xl font-black text-white leading-tight">¡Buen día, Profe!</h2>
-                    <div className="flex items-center gap-2 mt-4 text-white/90 bg-black/20 w-fit px-4 py-2 rounded-full backdrop-blur-sm text-[13px] font-semibold border border-white/10">
-                        <span className="w-2 h-2 rounded-full bg-[#43A047] animate-pulse"></span>
-                        <span>{dayName} • Horario Activo</span>
                     </div>
                 </div>
-            </div>
 
-            <div className="px-5 -mt-6 relative z-20 space-y-4">
-                <h3 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-[3px] ml-1">Mis Grupos de Hoy</h3>
+                <div className="mt-5 space-y-4">
+                    <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+                        <div className="flex items-center justify-between gap-4">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Mis grupos de hoy</p>
+                                <h2 className="mt-2 text-lg font-bold text-slate-950">Selecciona un grupo</h2>
+                            </div>
+                            <div className="rounded-3xl bg-[#EEF2FF] px-3 py-2 text-sm font-semibold text-[#2563EB]">{todaysClasses.length} grupos</div>
+                        </div>
 
-                {todaysClasses.length > 0 ? (
-                    todaysClasses.map((cls, index) => {
-                        const groupInfo = GROUPS_DB[cls.groupId];
-                        return (
-                            <div
-                                key={index}
-                                onClick={() => onSelectGroup(groupInfo)}
-                                className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex flex-col active:scale-[0.98] transition-all cursor-pointer"
-                            >
-                                <div className="flex justify-between items-center mb-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-2xl bg-[#691C32]/10 flex items-center justify-center">
-                                            <BookOpen className="text-[#691C32]" size={24} />
+                        <div className="mt-4 space-y-3">
+                            {todaysClasses.length > 0 ? todaysClasses.map((cls, index) => {
+                                const groupInfo = GROUPS_DB[cls.groupId];
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => onSelectGroup(groupInfo)}
+                                        className="w-full rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-slate-300 hover:bg-white"
+                                    >
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-700">{groupInfo.name}</p>
+                                                <p className="mt-1 text-sm text-slate-500">Tecnología • {groupInfo.count} alumnos</p>
+                                            </div>
+                                            <span className="text-sm font-semibold text-[#7A1235]">{cls.time}</span>
                                         </div>
-                                        <div>
-                                            <h2 className="text-2xl font-black text-gray-800 leading-none">{groupInfo.name}</h2>
-                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Tecnología • {groupInfo.count} Alumnos</p>
+                                    </button>
+                                );
+                            }) : (
+                                <div className="rounded-[20px] border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">No hay grupos disponibles.</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-6 grid grid-cols-2 gap-4">
+                    <div className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+                        <div className="flex items-center justify-between">
+                            <p className="text-xl font-bold">{todaysClasses.length}</p>
+                            <div className="rounded-3xl bg-[#EEF2FF] p-2 text-[#2563EB]">
+                                <BookOpen size={18} />
+                            </div>
+                        </div>
+                        <p className="mt-4 text-sm font-semibold text-slate-500">Grupos</p>
+                    </div>
+                    <div className="rounded-[20px] border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+                        <div className="flex items-center justify-between">
+                            <p className="text-xl font-bold">{totalStudents}</p>
+                            <div className="rounded-3xl bg-[#EEF2FF] p-2 text-[#2563EB]">
+                                <Users2 size={18} />
+                            </div>
+                        </div>
+                        <p className="mt-4 text-sm font-semibold text-slate-500">Alumnos</p>
+                    </div>
+                </div>
+
+                <div className="mt-6 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Mis grupos en detalle</p>
+                            <h2 className="mt-2 text-xl font-bold text-slate-950">Agenda rápida</h2>
+                        </div>
+                    </div>
+
+                    {todaysClasses.length > 0 ? (
+                        todaysClasses.map((cls, index) => {
+                            const groupInfo = GROUPS_DB[cls.groupId];
+                            return (
+                                <button
+                                    key={index}
+                                    onClick={() => onSelectGroup(groupInfo)}
+                                    className="w-full rounded-[24px] border border-slate-200 bg-white p-5 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(0,0,0,0.08)]"
+                                >
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="grid h-12 w-12 place-items-center rounded-3xl bg-[#F1F5F9] text-[#7A1235]">
+                                                <BookOpen size={22} />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-500">{groupInfo.name}</p>
+                                                <h3 className="mt-1 text-lg font-bold text-slate-950">Tecnología</h3>
+                                            </div>
+                                        </div>
+                                        <span className="rounded-full bg-[#F8FAFC] px-3 py-2 text-sm font-semibold text-slate-600">{groupInfo.count} alumnos</span>
+                                    </div>
+                                    <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+                                        <div className="inline-flex items-center gap-2 rounded-3xl bg-[#F8FAFC] px-3 py-2">
+                                            <Clock size={16} />
+                                            {cls.time}
+                                        </div>
+                                        <div className="inline-flex items-center gap-2 rounded-3xl bg-[#F8FAFC] px-3 py-2">
+                                            <GraduationCap size={16} />
+                                            Aula A-12
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className="flex items-center gap-2 bg-gray-50 px-4 py-3 rounded-2xl border border-gray-100">
-                                    <Clock size={16} className="text-[#BC955C]" />
-                                    <span className="text-sm font-black text-gray-600 uppercase tracking-tight">{cls.time} hr</span>
-                                </div>
-                            </div>
-                        );
-                    })
-                ) : (
-                    <div className="text-center p-12 bg-white rounded-3xl shadow-sm border border-gray-100 italic text-gray-400 font-bold">
-                        No hay clases programadas.
-                    </div>
-                )}
+                                </button>
+                            );
+                        })
+                    ) : (
+                        <div className="rounded-[24px] border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+                            No hay clases programadas.
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
